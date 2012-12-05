@@ -726,7 +726,8 @@ begin
           # sequence, but not all ODBC drivers support them.
           if value.acts_like?(:time) # Time, DateTime
             #%Q!{ts #{value.strftime("%Y-%m-%d %H:%M:%S")}}!
-            %Q!'#{value.strftime("%Y-%m-%d %H:%M:%S")}'!
+            #%Q!'#{value.strftime("%Y-%m-%d %H:%M:%S")}'!
+            %Q!timestamp('#{value.strftime("%Y-%m-%d")}','#{value.strftime("%H:%M:%S")}')!
           else # Date
             #%Q!{d #{value.strftime("%Y-%m-%d")}}!
             %Q!'#{value.strftime("%Y-%m-%d")}'!
@@ -1757,12 +1758,13 @@ begin
           when ODBC::Date
             Date.new(value.year, value.month, value.day)
           else
-            value.try(:strip)
+            value
           end
         rescue
+          value
           # Handle pre-epoch dates
           # TODO Write a test to show that this works beyond anecdotal evidence
-          DateTime.new(value.year, value.month, value.day, value.hour, value.minute, value.second)
+          #DateTime.new(value.year, value.month, value.day, value.hour, value.minute, value.second)
         end
         
         # In general, ActiveRecord uses lowercase attribute names. This may
