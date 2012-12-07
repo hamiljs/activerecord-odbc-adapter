@@ -909,10 +909,10 @@ begin
         
         # Returns the ID of the last inserted row.
         def insert(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil)
-          sql = sql.to_sql if sql.is_a?(Arel::InsertManager)
+          sql = to_sql(sql,binds) if sql.is_a?(Arel::InsertManager)
           @logger.unknown("ODBCAdapter#insert>") if @@trace
           @logger.unknown("args=[#{sql}|#{name}|#{pk}|#{id_value}|#{sequence_name}]") if @@trace
-          insert_sql(sql, name, pk, id_value, sequence_name)
+          insert_sql(sql, name, pk, id_value, sequence_name,binds)
         end
         
         # Returns the default sequence name for a table.
@@ -1373,11 +1373,11 @@ begin
         end
         
         # Returns the last auto-generated ID from the affected table.
-        def insert_sql(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil) # :nodoc:  
+        def insert_sql(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil, binds) # :nodoc:
           # id_value ::= pre-assigned id
           retry_count = 0
           begin
-            pre_insert(sql, name, pk, id_value, sequence_name) if respond_to?("pre_insert")
+            pre_insert(sql, name, pk, id_value, sequence_name, binds) if respond_to?("pre_insert")
             stmt = @connection.run(sql)
             table = sql.split(" ", 4)[2]
             res = id_value || last_insert_id(table, sequence_name || 
@@ -1405,7 +1405,7 @@ begin
             end
             raise StatementInvalid, e.message
           ensure
-            post_insert(sql, name, pk, id_value, sequence_name) if respond_to?("post_insert")
+            post_insert(sql, name, pk, id_value, sequence_name, binds) if respond_to?("post_insert")
             stmt.drop unless stmt.nil?
           end
           res
