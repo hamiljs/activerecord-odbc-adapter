@@ -908,11 +908,11 @@ begin
         end
         
         # Returns the ID of the last inserted row.
-        def insert(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil)
+        def insert(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil, binds)
           sql = to_sql(sql,binds) if sql.is_a?(Arel::InsertManager)
           @logger.unknown("ODBCAdapter#insert>") if @@trace
           @logger.unknown("args=[#{sql}|#{name}|#{pk}|#{id_value}|#{sequence_name}]") if @@trace
-          insert_sql(sql, name, pk, id_value, sequence_name,binds)
+          insert_sql(sql, name, pk, id_value, sequence_name, binds)
         end
         
         # Returns the default sequence name for a table.
